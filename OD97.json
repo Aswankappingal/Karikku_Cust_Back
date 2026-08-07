@@ -1,0 +1,164 @@
+{
+  "orderId": "OD97",
+  "orderNumber": "OD97",
+  "userId": "U5",
+  "userDetails": {
+    "name": "Shibiyas",
+    "email": "shibiyasshibi7@gmail.com",
+    "phone": "9190615559"
+  },
+  "items": [
+    {
+      "productId": "PD004",
+      "name": "Tender Coconut Water 200 ML",
+      "price": 60,
+      "mrp": 60,
+      "quantity": 1,
+      "sku": "",
+      "image": "https://storage.googleapis.com/karikku-b0ec4.firebasestorage.app/products/346d0342-4a15-4209-80be-8b9d3454df09_1760091207717.png",
+      "categoryId": "FwXYL9XCjMaluqsNkJcp",
+      "categoryName": "juices",
+      "weight": "",
+      "variant": null
+    }
+  ],
+  "itemCount": 1,
+  "totalQuantity": 1,
+  "pricing": {
+    "subtotal": 60,
+    "totalMRP": 60,
+    "totalSavings": 0,
+    "deliveryCharge": 0,
+    "discountAmount": 0,
+    "finalTotal": 60
+  },
+  "deliveryAddress": {
+    "fullName": "shibiyas",
+    "phone": "9190615559",
+    "email": "shibiyasshibi7@gmail.com",
+    "addressLine1": "DUHSS Thootha",
+    "addressLine2": "",
+    "city": "Perinthalmanna",
+    "state": "Kerala",
+    "pincode": "679357",
+    "landmark": "",
+    "addressType": "Home",
+    "fullAddress": "DUHSS Thootha, Perinthalmanna, Kerala - 679357"
+  },
+  "payment": {
+    "paymentMethod": "cod",
+    "status": "pending",
+    "amount": 60,
+    "currency": "INR",
+    "details": {},
+    "transactionId": null,
+    "paymentGateway": null,
+    "paymentId": null
+  },
+  "status": 0,
+  "orderStage": "placed",
+  "trackingStages": [
+    {
+      "stage": "placed",
+      "status": "completed",
+      "timestamp": {
+        "_seconds": 1771925847,
+        "_nanoseconds": 531000000
+      },
+      "description": "Order placed successfully"
+    }
+  ],
+  "delivery": {
+    "type": "standard",
+    "preferredDate": null,
+    "preferredTime": null,
+    "estimatedDate": null,
+    "actualDate": null,
+    "trackingNumber": null,
+    "courierPartner": null
+  },
+  "couponCode": null,
+  "specialInstructions": "",
+  "active": true,
+  "delete": false,
+  "isPreorder": false,
+  "isCancelledbyCustomer": false,
+  "isReturnable": true,
+  "metadata": {
+    "source": "web",
+    "ipAddress": "127.0.0.1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "orderSource": "website"
+  },
+  "createdAt": {
+    "_seconds": 1771925849,
+    "_nanoseconds": 78000000
+  },
+  "invoice": {
+    "invoiceNumber": "OD97",
+    "invoiceDate": "24 February 2026",
+    "company": {
+      "name": "KARIKKU VENTURES PRIVATE LIMITED",
+      "address": "F/152/25, ROYAL TRADE CENTER, BYE PASS ROAD, PERINTHALMANNA, MALAPPURAM, KERALA",
+      "city": "Malappuram",
+      "state": "Kerala",
+      "pincode": "679338",
+      "gst": "32AALCK3699D1ZF",
+      "fssai": "11325999000031",
+      "phone": "+91-XXXXXXXXXX",
+      "email": "support@karikku.com",
+      "website": "www.karikku.com"
+    },
+    "customer": {
+      "name": "shibiyas",
+      "email": "",
+      "phone": "9190615559",
+      "address": {
+        "line1": "DUHSS Thootha",
+        "line2": "",
+        "city": "Perinthalmanna",
+        "state": "Kerala",
+        "pincode": "679357"
+      }
+    },
+    "items": [
+      {
+        "sNo": 1,
+        "description": "Tender Coconut Water 200 ML",
+        "sku": "PD004",
+        "quantity": 1,
+        "unit": "Pcs",
+        "unitPrice": "60.00",
+        "discount": "0.00",
+        "taxableValue": "60.00",
+        "gstRate": "12%",
+        "gst": "7.20",
+        "totalAmount": "67.20"
+      }
+    ],
+    "pricing": {
+      "subtotal": "60.00",
+      "discount": "0.00",
+      "deliveryCharge": "0.00",
+      "gst": "0.00",
+      "total": "60.00"
+    },
+    "payment": {
+      "method": "COD",
+      "status": "PENDING",
+      "amount": "60.00",
+      "currency": "INR",
+      "transactionId": "N/A",
+      "paymentGateway": "N/A"
+    },
+    "generated": true,
+    "generatedAt": {
+      "_seconds": 1771925849,
+      "_nanoseconds": 78000000
+    }
+  },
+  "updatedAt": {
+    "_seconds": 1771925849,
+    "_nanoseconds": 78000000
+  }
+}
