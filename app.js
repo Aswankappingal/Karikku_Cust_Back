@@ -5943,26 +5943,16 @@ app.post('/add-to-wishlist', authenticateToken, async (req, res) => {
             addedAt: new Date().toISOString()
         });
 
-        // Remove product from cart if it exists
-        const cartIndex = cart.findIndex(item => item.productId === productId);
-        let updatedCart = cart;
-
-        if (cartIndex >= 0) {
-            updatedCart = cart.filter(item => item.productId !== productId);
-        }
-
-        // Update both wishlist and cart
+        // Update wishlist
         await userRef.update({
             wishlist,
-            cart: updatedCart,
             updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp()
         });
 
         res.status(200).json({
             success: true,
             message: 'Product added to wishlist',
-            wishlist: wishlist,
-            ...(cartIndex >= 0 && { removedFromCart: true })
+            wishlist: wishlist
         });
 
     } catch (error) {
