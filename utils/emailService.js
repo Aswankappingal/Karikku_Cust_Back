@@ -1,7 +1,8 @@
 require('dotenv').config();
-const nodemailer = require('nodemailer');
+// const nodemailer = require('nodemailer');
 
 // Configure the transporter
+/*
 const transporter = nodemailer.createTransport({
     service: 'gmail', // Use 'gmail' or your preferred service (e.g., SendGrid, Mailgun)
     auth: {
@@ -9,6 +10,7 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASSWORD
     }
 });
+*/
 
 /**
  * Send an email confirmation for a successfully placed order
@@ -16,6 +18,8 @@ const transporter = nodemailer.createTransport({
  * @param {object} orderDetails - Object containing order info (orderId, amount, items)
  */
 const sendOrderConfirmationEmail = async (userEmail, orderDetails) => {
+    console.log('Email sending functionality is currently commented out.');
+    /*
     if (!userEmail) {
         console.log('No user email provided for order confirmation.');
         return;
@@ -48,6 +52,7 @@ const sendOrderConfirmationEmail = async (userEmail, orderDetails) => {
     } catch (error) {
         console.error('Error sending order confirmation email:', error);
     }
+    */
 };
 
 /**
@@ -56,6 +61,8 @@ const sendOrderConfirmationEmail = async (userEmail, orderDetails) => {
  * @param {object} orderDetails - Object containing order info (orderId)
  */
 const sendOrderInTransitEmail = async (userEmail, orderDetails) => {
+    console.log('Email sending functionality is currently commented out.');
+    /*
     if (!userEmail) {
         console.log('No user email provided for in-transit notification.');
         return;
@@ -86,9 +93,11 @@ const sendOrderInTransitEmail = async (userEmail, orderDetails) => {
     } catch (error) {
         console.error('Error sending in-transit email:', error);
     }
+    */
 };
 
 module.exports = {
     sendOrderConfirmationEmail,
     sendOrderInTransitEmail
 };
+

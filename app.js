@@ -46,7 +46,7 @@ const allowedOrigins = [
 // app.use(cors({
 //     origin: '*',
 //     credentials: false,
-    
+
 // }));
 
 // // Enable preflight for all routes
@@ -55,9 +55,9 @@ const allowedOrigins = [
 // FOR PRODUCTION
 
 app.use(cors({
-  origin: ['https://karikku.co','http://localhost:3005','http://localhost:3000','https://bck.karikku.co'],
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  credentials: true
+    origin: ['https://www.karikku.co', 'https://karikku.co', 'http://localhost:3005', 'http://localhost:3000', 'https://bck.karikku.co'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true
 }));
 
 // optional (safe fallback)
@@ -182,7 +182,7 @@ app.options(/.*/, cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//                  //////////////////////////////////////////RAZORPAY////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////RAZORPAY////////////////////////////////////////////////////////////////////
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -3421,7 +3421,7 @@ app.get('/coupons', async (req, res) => {
             .where('hidden', '==', false)
         // Filter by productType and exclude hidden coupons
         query = query.where('delete', '==', false)
-                     .where('hidden', '==', false);
+            .where('hidden', '==', false);
 
         if (productType && productType !== 'ALL') {
             query = query.where('productType', 'in', ['ALL', productType]);
@@ -3467,7 +3467,7 @@ app.get('/coupons', async (req, res) => {
                 if (productId) {
                     // Check for both productIds array and singular fields (backward compatibility)
                     const allowedIds = coupon.productIds || (coupon.productId ? [coupon.productId] : []) || (coupon.productID ? [coupon.productID] : []);
-                    
+
                     if (allowedIds.length > 0) {
                         if (!allowedIds.includes(productId)) return false;
                     }
@@ -3560,14 +3560,14 @@ app.get('/coupons/verify/:code', async (req, res) => {
         // Validate product restrictions
         if (coupon.productType === 'SPECIFIC') {
             const allowedIds = coupon.productIds || (coupon.productId ? [coupon.productId] : []) || (coupon.productID ? [coupon.productID] : []);
-            
+
             // Collect all product IDs to check (from productId or comma-separated productIds)
             let idsToCheck = [];
             if (productId) idsToCheck.push(productId);
             if (productIds) {
                 idsToCheck = [...idsToCheck, ...productIds.split(',')];
             }
-            
+
             // Remove duplicates and empty strings
             idsToCheck = [...new Set(idsToCheck.filter(id => id))];
 
@@ -4397,7 +4397,7 @@ app.post('/place-order', authenticateToken, async (req, res) => {
         const settingsRef = db.collection('settings').doc('global');
         const settingsDoc = await settingsRef.get();
         const settingsData = settingsDoc.data();
-        
+
         const nextOrderId = settingsData?.orders?.orderId || 1;
         const nextInvoiceNo = settingsData?.invoices?.invoiceId || 1;
 
@@ -4415,7 +4415,7 @@ app.post('/place-order', authenticateToken, async (req, res) => {
                 .where('delete', '==', false)
                 .limit(1)
                 .get();
-                
+
             if (!couponSnap.empty) {
                 const couponData = couponSnap.docs[0].data();
                 if (couponData.productType === 'SPECIFIC') {
@@ -4492,8 +4492,8 @@ app.post('/place-order', authenticateToken, async (req, res) => {
                     paymentMethod === 'cod'
                         ? 'pending'
                         : (paymentDetails?.transactionId || paymentDetails?.paymentId || paymentDetails?.razorpayPaymentId)
-                        ? 'completed'
-                        : 'pending',
+                            ? 'completed'
+                            : 'pending',
                 amount: orderTotals.finalTotal,
                 currency: 'INR',
                 transactionId: paymentDetails?.transactionId || null,
@@ -4728,7 +4728,7 @@ app.post('/single-product-place-order', authenticateToken, async (req, res) => {
         const settingsRef = db.collection('settings').doc('global');
         const settingsDoc = await settingsRef.get();
         const settingsData = settingsDoc.data();
-        
+
         const nextOrderId = settingsData?.orders?.orderId || 1;
         const nextInvoiceNo = settingsData?.invoices?.invoiceId || 1;
 
@@ -5053,7 +5053,7 @@ function getStateCode(stateName) {
     };
 
     if (!stateName) return '32'; // Default to Kerala if missing
-    
+
     const normalizedState = stateName.toLowerCase().trim();
     return stateCodes[normalizedState] || '32'; // Default to Kerala if not found
 }
@@ -6271,9 +6271,9 @@ function generateInvoiceData(orderDetails) {
         day: 'numeric'
     });
 
-    const oDate = (createdAt instanceof Date) ? createdAt : 
-                 (createdAt && createdAt.toDate) ? createdAt.toDate() : new Date();
-    
+    const oDate = (createdAt instanceof Date) ? createdAt :
+        (createdAt && createdAt.toDate) ? createdAt.toDate() : new Date();
+
     const orderDate = oDate.toLocaleDateString('en-IN', {
         year: 'numeric',
         month: 'long',
@@ -6316,10 +6316,10 @@ function generateInvoiceData(orderDetails) {
     // Format items for invoice
     const itemsForInvoice = items.map((item, index) => {
         const itemPricing = (pricing.itemsPricing || []).find(p => String(p.productId) === String(item.productId));
-        
+
         const quantity = toNumber(item.quantity, 1);
         const mrpUnit = toNumber(item.price || item.unitPrice, 0);
-        
+
         // Use standardized calculations from itemPricing if available, otherwise fallback
         const basePriceUnit = itemPricing ? (itemPricing.basePrice / quantity) : (mrpUnit / (1 + (toNumber(item.gstRate || 5) / 100)));
         const discountTotal = itemPricing ? itemPricing.discount : 0;
@@ -6796,7 +6796,7 @@ app.delete('/delete-address/:addressId', authenticateToken, async (req, res) => 
         const userData = userDoc.data();
         let addresses = userData.addresses || [];
         const initialCount = addresses.length;
-        
+
         addresses = addresses.filter(addr => addr.id !== addressId);
 
         if (addresses.length === initialCount) {
@@ -7036,7 +7036,7 @@ app.put("/update-order-payment", authenticateToken, async (req, res) => {
         if (paymentStatus === 'completed') updateData.paidAt = new Date();
 
         const ordersQuery = await db.collection('orders').where('orderId', '==', orderId).get();
-        
+
         if (ordersQuery.empty) {
             return res.status(404).json({ error: "Order not found" });
         }
@@ -7255,7 +7255,7 @@ app.get('/home-banners', async (req, res) => {
         const snapshot = await db.collection('banners')
             .where('delete', '!=', true)
             .get();
-        
+
         const banners = snapshot.docs
             .map(doc => ({ id: doc.id, ...doc.data() }))
             .filter(banner => banner.active !== false); // Filter for active banners
@@ -7280,10 +7280,10 @@ db.collection('orders').onSnapshot((snapshot) => {
     snapshot.docChanges().forEach(async (change) => {
         if (change.type === 'modified') {
             const newData = change.doc.data();
-            
+
             // Check if status is in transit (assuming orderStage 'shipped' or 'in_transit' or status 2/3)
             const isNowInTransit = newData.orderStage === 'shipped' || newData.orderStage === 'in_transit' || newData.status === 2;
-            
+
             // Flag to prevent duplicate emails
             if (isNowInTransit && !newData.inTransitEmailSent) {
                 const userEmail = newData.deliveryAddress?.email || newData.userDetails?.email;
