@@ -4461,6 +4461,9 @@ app.post('/place-order', authenticateToken, async (req, res) => {
             pricing: {
                 subtotal: Number(orderTotals.subtotal || 0),
                 totalMRP: Number(orderTotals.totalMRP || 0),
+                mrpDiscount: Number(orderTotals.mrpDiscount || 0),
+                basePrice: Number(orderTotals.basePrice || 0),
+                taxableValue: Number(orderTotals.taxableValue || 0),
                 totalSavings: Number(orderTotals.totalSavings || 0),
                 deliveryCharge: Number(orderTotals.deliveryCharge || 0),
                 codCharge: Number(codCharge || 0),
@@ -4812,6 +4815,9 @@ app.post('/single-product-place-order', authenticateToken, async (req, res) => {
             pricing: {
                 subtotal: Number(orderTotals.subtotal || 0),
                 totalMRP: Number(orderTotals.totalMRP || 0),
+                mrpDiscount: Number(orderTotals.mrpDiscount || 0),
+                basePrice: Number(orderTotals.basePrice || 0),
+                taxableValue: Number(orderTotals.taxableValue || 0),
                 totalSavings: Number(orderTotals.totalSavings || 0),
                 deliveryCharge: Number(orderTotals.deliveryCharge || 0),
                 codCharge: Number(codCharge || 0),
@@ -6321,7 +6327,7 @@ function generateInvoiceData(orderDetails) {
         const mrpUnit = toNumber(item.price || item.unitPrice, 0);
 
         // Use standardized calculations from itemPricing if available, otherwise fallback
-        const basePriceUnit = itemPricing ? (itemPricing.basePrice / quantity) : (mrpUnit / (1 + (toNumber(item.gstRate || 5) / 100)));
+        const basePriceUnit = itemPricing ? (itemPricing.basePrice / quantity) : mrpUnit;
         const discountTotal = itemPricing ? itemPricing.discount : 0;
         const taxableValue = itemPricing ? itemPricing.taxableValue : (basePriceUnit * quantity - discountTotal);
         const gstAmount = itemPricing ? itemPricing.gstAmount : (taxableValue * (toNumber(item.gstRate || 5) / 100));
@@ -7303,6 +7309,85 @@ db.collection('orders').onSnapshot((snapshot) => {
             }
         }
     });
+});
+
+// FAQ Endpoints
+app.get('/faq-categories-with-faqs', async (req, res) => {
+    try {
+        const faqsSnapshot = await db.collection('faqs').get();
+        
+        const categoriesMap = {};
+        
+        faqsSnapshot.forEach(doc => {
+            const data = doc.data();
+            
+            // Skip deleted or inactive FAQs
+            if (data.delete === true || data.active === false) return;
+            
+            const catId = data.categoryId || 'uncategorized';
+            const catName = data.categoryName || 'Other FAQs';
+            
+            if (!categoriesMap[catId]) {
+                categoriesMap[catId] = {
+                    id: catId,
+                    name: catName,
+                    title: catName,
+                    displayOrder: data.displayOrder || 99,
+                    faqs: []
+                };
+            }
+            
+            categoriesMap[catId].faqs.push({
+                id: doc.id,
+                question: data.question,
+                answer: data.answer,
+                ...data
+            });
+        });
+        
+        // Sort categories by displayOrder
+        const categoriesWithFaqs = Object.values(categoriesMap).sort((a, b) => a.displayOrder - b.displayOrder);
+        
+        res.status(200).json({
+            success: true,
+            data: categoriesWithFaqs
+        });
+    } catch (error) {
+        console.error('Error fetching FAQs:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch FAQs' });
+    }
+});
+
+app.get('/faqs/:categoryId', async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+        const faqsSnapshot = await db.collection('faqs').where('categoryId', '==', categoryId).get();
+        
+        const faqs = [];
+        let categoryName = 'Category';
+        
+        faqsSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.delete === true || data.active === false) return;
+            
+            if (data.categoryName) categoryName = data.categoryName;
+            
+            faqs.push({
+                id: doc.id,
+                ...data
+            });
+        });
+        
+        res.status(200).json({
+            success: true,
+            category: { id: categoryId, name: categoryName },
+            faqs,
+            totalFAQs: faqs.length
+        });
+    } catch (error) {
+        console.error('Error fetching category FAQs:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch category FAQs' });
+    }
 });
 
 const PORT = process.env.PORT || 3006;

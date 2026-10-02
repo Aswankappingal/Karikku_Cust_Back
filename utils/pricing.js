@@ -7,17 +7,22 @@
 const calculateItemPricing = (item, discountShare = 0) => {
     // Priority check for price in Karikku structure (this is the SELLING PRICE)
     const sellingPrice = parseFloat(
+        item.variantCombination?.sellingPrice ||
         item.variantCombination?.price || 
         item.currentPrice || 
         item.price || 
+        item.productDetails?.sellingPrice ||
         item.productDetails?.price || 
         0
     );
 
     // Get Original Price (MRP including GST)
     const mrpUnitPrice = parseFloat(
+        item.variantCombination?.mrp ||
         item.variantCombination?.originalPrice || 
         item.originalPrice || 
+        item.mrp ||
+        item.productDetails?.mrp ||
         item.productDetails?.originalPrice || 
         sellingPrice // Fallback to selling price
     );
@@ -36,20 +41,22 @@ const calculateItemPricing = (item, discountShare = 0) => {
     // Step 1: Calculate MRP Discount (Original - Selling)
     const mrpDiscount = Math.max(0, (mrpUnitPrice - sellingPrice) * quantity);
 
-    // Step 2: Extract base price from Selling Price (per unit)
-    const basePriceUnit = Math.round((sellingPrice / (1 + gstRate)) * 100) / 100;
-    const basePriceTotal = Math.round(basePriceUnit * quantity * 100) / 100;
+    // Step 2: Total gross selling price before transaction discounts
+    const grossSelling = sellingPrice * quantity;
+    const basePriceUnit = sellingPrice;
+    const basePriceTotal = grossSelling;
 
-    // Step 3: Apply Transaction Discount (coupon/coins share) on base
-    const discount = Math.min(discountShare, basePriceTotal);
-    const taxableValue = Math.round(Math.max(0, basePriceTotal - discount) * 100) / 100;
+    // Step 3: Apply Transaction Discount (coupon/coins share)
+    const discount = Math.min(discountShare, grossSelling);
+    const finalItemGross = Math.max(0, grossSelling - discount);
 
-    // Step 4: Calculate GST on taxable value
+    // Step 4: Calculate GST on top of the discounted amount
+    const taxableValue = finalItemGross;
     const gstAmount = Math.round(taxableValue * gstRate * 100) / 100;
     const cgst = Math.round((gstAmount / 2) * 100) / 100;
     const sgst = Math.round((gstAmount - cgst) * 100) / 100;
 
-    // Step 5: Individual Item Total (Selling Price after coupon)
+    // Step 5: Individual Item Total (Discounted Selling Price + GST)
     const itemTotal = Math.round((taxableValue + gstAmount) * 100) / 100;
 
     return {
@@ -58,7 +65,7 @@ const calculateItemPricing = (item, discountShare = 0) => {
         unitMrp: mrpUnitPrice,
         totalMrp: mrpUnitPrice * quantity,
         unitSellingPrice: sellingPrice,
-        totalSellingPrice: sellingPrice * quantity,
+        totalSellingPrice: grossSelling,
         basePrice: basePriceTotal,
         mrpDiscount: mrpDiscount, // The "Discount on MRP" row
         discount: discount,       // The "Coupon savings" share
@@ -76,9 +83,9 @@ const calculateCartTotals = (cartItems, totalDiscount = 0, deliveryCharge = 0, c
     const activeCodCharge = isCod ? parseFloat(codCharge || 0) : 0;
     const activeDeliveryCharge = parseFloat(deliveryCharge || 0);
 
-    // Initial pass to get base prices for proportional discount distribution
-    let totalBasePrice = 0;
-    let totalApplicableBasePrice = 0;
+    // Initial pass to get gross prices for proportional discount distribution
+    let totalGrossPrice = 0;
+    let totalApplicableGrossPrice = 0;
 
     const itemBases = items.map(item => {
         const rawGst = item.variantCombination?.gst || 
@@ -90,17 +97,20 @@ const calculateCartTotals = (cartItems, totalDiscount = 0, deliveryCharge = 0, c
         const gstRate = parseFloat(rawGst) / 100;
         
         const price = parseFloat(
+            item.variantCombination?.sellingPrice ||
             item.variantCombination?.price || 
             item.currentPrice || 
             item.price || 
+            item.productDetails?.sellingPrice ||
             item.productDetails?.price || 
             0
         );
         const quantity = parseInt(item.quantity || 1);
-        const basePriceUnit = Math.round((price / (1 + gstRate)) * 100) / 100;
-        const basePriceTotal = Math.round(basePriceUnit * quantity * 100) / 100;
+        const grossItemPrice = price * quantity;
+        const basePriceUnit = price;
+        const basePriceTotal = grossItemPrice;
         
-        totalBasePrice += basePriceTotal;
+        totalGrossPrice += grossItemPrice;
 
         // Check if this item is applicable for the coupon discount
         const productId = item.productId || item.id;
@@ -109,10 +119,10 @@ const calculateCartTotals = (cartItems, totalDiscount = 0, deliveryCharge = 0, c
                             applicableProductIds.includes(String(productId));
         
         if (isApplicable) {
-            totalApplicableBasePrice += basePriceTotal;
+            totalApplicableGrossPrice += grossItemPrice;
         }
 
-        return { basePriceTotal, isApplicable };
+        return { grossItemPrice, basePriceTotal, isApplicable };
     });
 
     // Distribute total discount proportionally across ONLY applicable items
@@ -122,15 +132,15 @@ const calculateCartTotals = (cartItems, totalDiscount = 0, deliveryCharge = 0, c
 
     const itemPricingBreakdown = items.map((item, index) => {
         let discountShare = 0;
-        const { basePriceTotal, isApplicable } = itemBases[index];
+        const { grossItemPrice, isApplicable } = itemBases[index];
 
-        if (totalDiscount > 0 && isApplicable && totalApplicableBasePrice > 0) {
+        if (totalDiscount > 0 && isApplicable && totalApplicableGrossPrice > 0) {
             processedApplicableCount++;
             if (processedApplicableCount === applicableItemsCount) {
                 // Last applicable item gets the remaining discount to ensure sum == totalDiscount
                 discountShare = Math.round((totalDiscount - distributedDiscountTotal) * 100) / 100;
             } else {
-                discountShare = Math.round((basePriceTotal / totalApplicableBasePrice) * totalDiscount * 100) / 100;
+                discountShare = Math.round((grossItemPrice / totalApplicableGrossPrice) * totalDiscount * 100) / 100;
                 distributedDiscountTotal += discountShare;
             }
         }
@@ -177,9 +187,12 @@ const calculateCartTotals = (cartItems, totalDiscount = 0, deliveryCharge = 0, c
         delivery: activeDeliveryCharge,
         codCharge: activeCodCharge,
         total,
-        totalMRP: summary.totalMrp,        // Compatibility Alias
-        subtotal: summary.taxableValue,   // Compatibility Alias
+        totalMRP: summary.totalMrp,        // Compatibility Alias: Total MRP
+        totalMrp: summary.totalMrp,
+        subtotal: summary.totalMrp,        // Standardized Subtotal to Total MRP
+        totalSellingPrice: Math.round((summary.totalMrp - summary.mrpDiscount) * 100) / 100,
         gstAmount: summary.gstAmount,      // Consistency
+        gst: summary.gstAmount,            // Compatibility Alias
         totalSavings: summary.mrpDiscount + summary.discount, // display
         discountAmount: summary.discount,  // Consistency
         finalTotal: total,                 // Compatibility Alias
