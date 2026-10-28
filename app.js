@@ -54,6 +54,9 @@ const allowedOrigins = [
 
 // FOR PRODUCTION
 
+
+
+
 app.use(cors({
     origin: ['https://www.karikku.co', 'https://karikku.co', 'http://localhost:3005', 'http://localhost:3000', 'https://bck.karikku.co'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
